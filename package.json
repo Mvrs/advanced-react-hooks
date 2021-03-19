@@ -17,6 +17,7 @@
     "@kentcdodds/react-workshop-app": "^4.0.0",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.1",
+    "babel-loader": "^8.2.2",
     "chalk": "^4.1.0",
     "codegen.macro": "^4.1.0",
     "mq-polyfill": "^1.1.8",
