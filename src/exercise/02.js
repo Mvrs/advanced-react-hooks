@@ -10,7 +10,38 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-// 🐨 this is going to be our generic asyncReducer
+function useSafeDispatch(dispatch) {
+  // to know if a component has been mounted use => useRef
+  // i dont wanna call if we have unmounted
+  // so we keep track of it with useRef
+  const mountedRef = React.useRef(false)
+
+  // this will insure this function will be call as soon were mounted
+  // without waiting for the browser to paint the screen
+  // also make sure the cleanup is unmounted without waiting
+  // for anything either.
+  React.useLayoutEffect(() => {
+    mountedRef.current = true
+    // cleanup
+    return () => {
+      mountedRef.current = false
+    }
+    // empty dependecy list to make sure its called only on
+    // mount/unmount
+  }, [])
+
+  return React.useCallback(
+    (...args) => {
+      // if you know its mounted
+      if (mountedRef.current) {
+        // then you know its safe to unmount
+        dispatch(...args)
+      }
+    },
+    [dispatch],
+  )
+}
+
 function asyncReducer(state, action) {
   switch (action.type) {
     case 'pending': {
@@ -28,12 +59,15 @@ function asyncReducer(state, action) {
   }
 }
 function useAsync(initialState) {
-  const [state, dispatch] = React.useReducer(asyncReducer, {
+  // will trigger a rerender even if the component has not been mounted
+  const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
     error: null,
     ...initialState,
   })
+
+  const dispatch = useSafeDispatch(unsafeDispatch)
 
   const run = React.useCallback(promise => {
     dispatch({type: 'pending'})
