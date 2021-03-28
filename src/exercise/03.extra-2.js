@@ -18,14 +18,6 @@ import {useAsync} from '../utils'
 // 🐨 Create a PokemonCacheContext
 const PokemonCacheContext = React.createContext()
 
-// 🐨 create a PokemonCacheProvider function
-function PokemonCacheProvider(children) {
-  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {})
-  return (
-    <PokemonCacheContext.Provider value={[cache, dispatch]} {...children} />
-  )
-}
-
 function pokemonCacheReducer(state, action) {
   switch (action.type) {
     case 'ADD_POKEMON': {
@@ -37,9 +29,25 @@ function pokemonCacheReducer(state, action) {
   }
 }
 
+// 🐨 create a PokemonCacheProvider function
+function PokemonCacheProvider(children) {
+  const [cache, dispatch] = React.useReducer(pokemonCacheReducer, {})
+  return (
+    <PokemonCacheContext.Provider value={[cache, dispatch]} {...children} />
+  )
+}
+
+function usePokemonCache() {
+  const context = React.useContext(PokemonCacheContext)
+  if (!context) {
+    throw new Error('usePokemonCache must be used in a PokemonCacheProvider')
+  }
+  return context
+}
+
 function PokemonInfo({pokemonName}) {
   // 🐨 get the cache and dispatch from useContext with PokemonCacheContext
-  const [cache, dispatch] = React.useContext(PokemonCacheContext)
+  const [cache, dispatch] = usePokemonCache()
 
   const {data: pokemon, status, error, run, setData} = useAsync()
 
